@@ -31,6 +31,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-actuator</artifactId>
         </dependency>
         <dependency>
@@ -50,7 +54,10 @@
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
-            <version>${kafka-clients.version}</version>
+            <!-- ccs stands for Confluent Community Edition
+             See https://www.confluent.io/confluent-community-license-faq/
+             -->
+            <version>${confluent.version}-ccs</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -97,7 +104,7 @@
         <dependency>
             <groupId>com.azure</groupId>
             <artifactId>azure-identity</artifactId>
-            <version>1.13.3</version>
+            <version>1.14.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>io.netty</groupId>
@@ -207,6 +214,19 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp</artifactId>
             <version>${okhttp3.mockwebserver.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${confluent.version}-ccs</version>
+            <classifier>test</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcpkix-jdk18on</artifactId>
+            <version>1.80</version>
             <scope>test</scope>
         </dependency>
 
@@ -326,7 +346,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>@{argLine} --illegal-access=permit</argLine>
+                    <argLine>@{argLine}</argLine>
                 </configuration>
             </plugin>
             <plugin>
@@ -489,6 +509,7 @@
                                 </goals>
                                 <configuration>
                                     <arguments>build</arguments>
+                                    <pnpmInheritsProxyConfigFromMaven>false</pnpmInheritsProxyConfigFromMaven>
                                 </configuration>
                             </execution>
                         </executions>

@@ -17,7 +17,6 @@ import static org.mockito.Mockito.when;
 import com.azure.core.credential.AccessToken;
 import com.azure.core.credential.TokenCredential;
 import com.azure.core.credential.TokenRequestContext;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.security.auth.callback.Callback;
@@ -33,7 +32,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Mono;
 
 @ExtendWith(MockitoExtension.class)
-public class AzureEntraLoginCallbackHandlerTest {
+class AzureEntraLoginCallbackHandlerTest {
 
   // These are not real tokens. It was generated using fake values with an invalid signature,
   // so it is safe to store here.
@@ -60,9 +59,6 @@ public class AzureEntraLoginCallbackHandlerTest {
   private OAuthBearerTokenCallback oauthBearerTokenCallBack;
 
   @Mock
-  private OAuthBearerToken oauthBearerToken;
-
-  @Mock
   private TokenCredential tokenCredential;
 
   @Mock
@@ -71,18 +67,14 @@ public class AzureEntraLoginCallbackHandlerTest {
   private AzureEntraLoginCallbackHandler azureEntraLoginCallbackHandler;
 
   @BeforeEach
-  public void beforeEach() {
+  void beforeEach() {
     azureEntraLoginCallbackHandler = new AzureEntraLoginCallbackHandler();
     azureEntraLoginCallbackHandler.setTokenCredential(tokenCredential);
   }
 
   @Test
-  public void shouldProvideTokenToCallbackWithSuccessfulTokenRequest()
-      throws UnsupportedCallbackException {
-    final Map<String, Object> configs = new HashMap<>();
-    configs.put(
-        "bootstrap.servers",
-        List.of("test-eh.servicebus.windows.net:9093"));
+  void shouldProvideTokenToCallbackWithSuccessfulTokenRequest() throws UnsupportedCallbackException {
+    Map<String, Object> configs = Map.of("bootstrap.servers", List.of("test-eh.servicebus.windows.net:9093"));
 
     when(tokenCredential.getToken(any(TokenRequestContext.class))).thenReturn(Mono.just(accessToken));
     when(accessToken.getToken()).thenReturn(VALID_SAMPLE_TOKEN);
@@ -113,11 +105,8 @@ public class AzureEntraLoginCallbackHandlerTest {
   }
 
   @Test
-  public void shouldProvideErrorToCallbackWithTokenError() throws UnsupportedCallbackException {
-    final Map<String, Object> configs = new HashMap<>();
-    configs.put(
-        "bootstrap.servers",
-        List.of("test-eh.servicebus.windows.net:9093"));
+  void shouldProvideErrorToCallbackWithTokenError() throws UnsupportedCallbackException {
+    Map<String, Object> configs = Map.of("bootstrap.servers", List.of("test-eh.servicebus.windows.net:9093"));
 
     when(tokenCredential.getToken(any(TokenRequestContext.class)))
         .thenThrow(new RuntimeException("failed to acquire token"));
@@ -135,35 +124,32 @@ public class AzureEntraLoginCallbackHandlerTest {
   }
 
   @Test
-  public void shouldThrowExceptionWithNullBootstrapServers() {
-    final Map<String, Object> configs = new HashMap<>();
+  void shouldThrowExceptionWithNullBootstrapServers() {
+    assertThrows(IllegalArgumentException.class, () -> azureEntraLoginCallbackHandler.configure(
+        Map.of(), null, null));
+  }
+
+  @Test
+  void shouldThrowExceptionWithMultipleBootstrapServers() {
+    Map<String, Object> configs = Map.of("bootstrap.servers", List.of("server1", "server2"));
 
     assertThrows(IllegalArgumentException.class, () -> azureEntraLoginCallbackHandler.configure(
         configs, null, null));
   }
 
   @Test
-  public void shouldThrowExceptionWithMultipleBootstrapServers() {
-    final Map<String, Object> configs = new HashMap<>();
-    configs.put("bootstrap.servers", List.of("server1", "server2"));
-
-    assertThrows(IllegalArgumentException.class, () -> azureEntraLoginCallbackHandler.configure(
-        configs, null, null));
-  }
-
-  @Test
-  public void shouldThrowExceptionWithUnsupportedCallback() {
+  void shouldThrowExceptionWithUnsupportedCallback() {
     assertThrows(UnsupportedCallbackException.class, () -> azureEntraLoginCallbackHandler.handle(
         new Callback[] {mock(Callback.class)}));
   }
 
   @Test
-  public void shouldDoNothingOnClose() {
+  void shouldDoNothingOnClose() {
     azureEntraLoginCallbackHandler.close();
   }
 
   @Test
-  public void shouldSupportDefaultConstructor() {
+  void shouldSupportDefaultConstructor() {
     new AzureEntraLoginCallbackHandler();
   }
 }
